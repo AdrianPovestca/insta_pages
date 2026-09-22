@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect - Clean Destruction</title>
+    <title>Connect - Shattering</title>
     <style>
         * {
             margin: 0;
@@ -128,7 +128,7 @@
             cursor: not-allowed;
         }
 
-        .falling-piece {
+        .shattering-piece {
             position: fixed;
             background: white;
             border-radius: 12px;
@@ -136,6 +136,12 @@
             transform-style: preserve-3d;
             z-index: 50;
             pointer-events: none;
+        }
+
+        .debris-particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 49;
         }
     </style>
 </head>
@@ -173,8 +179,60 @@
     </div>
 
     <script>
-        // 3D Disappearing element
-        class DisappearingElement {
+        // Debris particle system
+        class DebrisParticle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 12;
+                this.vy = (Math.random() - 0.5) * 12 - 2;
+                this.life = 1;
+                this.size = Math.random() * 8 + 2;
+                this.opacity = Math.random() * 0.8 + 0.2;
+                this.decay = Math.random() * 0.03 + 0.02;
+                this.gravity = 0.2;
+                this.element = null;
+            }
+
+            create() {
+                this.element = document.createElement('div');
+                this.element.className = 'debris-particle';
+                this.element.style.width = this.size + 'px';
+                this.element.style.height = this.size + 'px';
+                this.element.style.background = `rgba(200, 200, 200, ${this.opacity})`;
+                this.element.style.borderRadius = '50%';
+                this.element.style.boxShadow = `0 0 ${this.size}px rgba(150, 150, 150, 0.6)`;
+                document.body.appendChild(this.element);
+            }
+
+            update() {
+                this.vy += this.gravity;
+                this.vx *= 0.98;
+                this.vy *= 0.98;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+
+                if (this.element) {
+                    this.element.style.left = this.x + 'px';
+                    this.element.style.top = this.y + 'px';
+                    this.element.style.opacity = Math.max(0, this.life * this.opacity);
+                }
+            }
+
+            isAlive() {
+                return this.life > 0;
+            }
+
+            remove() {
+                if (this.element) {
+                    this.element.remove();
+                }
+            }
+        }
+
+        // Shattering piece
+        class ShatteringPiece {
             constructor(element, startX, startY, width, height) {
                 this.element = element;
                 this.x = startX;
@@ -183,24 +241,25 @@
                 this.width = width;
                 this.height = height;
                 
-                // Velocity
-                this.vx = (Math.random() - 0.5) * 5;
-                this.vy = (Math.random() - 0.5) * 5 - 3;
-                this.vz = -Math.random() * 8 - 10;
+                // Random velocity in all directions
+                this.vx = (Math.random() - 0.5) * 10;
+                this.vy = (Math.random() - 0.5) * 10 - 3;
+                this.vz = (Math.random() - 0.5) * 8 - 4;
                 
                 // Rotation
-                this.rotX = (Math.random() - 0.5) * 0.4;
-                this.rotY = (Math.random() - 0.5) * 0.4;
-                this.rotZ = (Math.random() - 0.5) * 0.4;
+                this.rotX = (Math.random() - 0.5) * 0.5;
+                this.rotY = (Math.random() - 0.5) * 0.5;
+                this.rotZ = (Math.random() - 0.5) * 0.5;
                 
-                this.angularVx = (Math.random() - 0.5) * 0.2;
-                this.angularVy = (Math.random() - 0.5) * 0.2;
-                this.angularVz = (Math.random() - 0.5) * 0.2;
+                this.angularVx = (Math.random() - 0.5) * 0.25;
+                this.angularVy = (Math.random() - 0.5) * 0.25;
+                this.angularVz = (Math.random() - 0.5) * 0.25;
                 
-                this.gravity = 0.15;
-                this.friction = 0.97;
+                this.gravity = 0.2;
+                this.friction = 0.96;
                 this.life = 1;
-                this.decay = 0.015;
+                this.decay = 0.012;
+                this.debrisParticles = [];
             }
 
             update() {
@@ -219,6 +278,20 @@
                 this.rotY += this.angularVy;
                 this.rotZ += this.angularVz;
                 
+                // Generate debris trail
+                if (Math.random() > 0.7) {
+                    const debris = new DebrisParticle(
+                        this.x + this.width / 2,
+                        this.y + this.height / 2
+                    );
+                    debris.create();
+                    this.debrisParticles.push(debris);
+                }
+                
+                // Update debris
+                this.debrisParticles = this.debrisParticles.filter(d => d.isAlive());
+                this.debrisParticles.forEach(d => d.update());
+                
                 // Fade out
                 this.life -= this.decay;
                 
@@ -231,11 +304,11 @@
                 this.element.style.pointerEvents = 'none';
                 this.element.style.opacity = Math.max(0, this.life);
                 
-                // 3D Transform with perspective
+                // 3D Transform
                 const rotXDeg = this.rotX * (180 / Math.PI);
                 const rotYDeg = this.rotY * (180 / Math.PI);
                 const rotZDeg = this.rotZ * (180 / Math.PI);
-                const scale = 0.8 + this.life * 0.2;
+                const scale = 0.7 + this.life * 0.3;
                 
                 this.element.style.transform = `
                     perspective(1200px)
@@ -250,55 +323,81 @@
             isAlive() {
                 return this.life > 0;
             }
+
+            cleanup() {
+                this.debrisParticles.forEach(d => d.remove());
+            }
         }
 
         const loginForm = document.getElementById('loginForm');
         const connectBtn = document.getElementById('connectBtn');
         const loginContainer = document.getElementById('loginContainer');
-        let disappearingElements = [];
+        let shatteringPieces = [];
+        let debrisParticles = [];
 
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
             connectBtn.disabled = true;
 
-            // Elements to make disappear
-            const elementIds = ['title', 'subtitle', 'email', 'password', 'button'];
-            let elementIndex = 0;
+            // Get container position
+            const containerRect = loginContainer.getBoundingClientRect();
+            const centerX = containerRect.left + containerRect.width / 2;
+            const centerY = containerRect.top + containerRect.height / 2;
 
-            const removeNextElement = () => {
-                if (elementIndex < elementIds.length) {
-                    const elementId = elementIds[elementIndex];
-                    const element = document.getElementById(elementId);
-                    
+            // Create debris burst at center
+            for (let i = 0; i < 30; i++) {
+                const debris = new DebrisParticle(centerX, centerY);
+                debris.create();
+                debrisParticles.push(debris);
+            }
+
+            // Shatter all form elements
+            const elementIds = ['title', 'subtitle', 'email', 'password', 'button'];
+            
+            elementIds.forEach((id, index) => {
+                setTimeout(() => {
+                    const element = document.getElementById(id);
                     if (element) {
                         const rect = element.getBoundingClientRect();
-                        const disappearing = new DisappearingElement(
+                        
+                        // Create more debris at element position
+                        for (let i = 0; i < 8; i++) {
+                            const debris = new DebrisParticle(rect.left + rect.width / 2, rect.top + rect.height / 2);
+                            debris.create();
+                            debrisParticles.push(debris);
+                        }
+                        
+                        const shattering = new ShatteringPiece(
                             element,
                             rect.left,
                             rect.top,
                             rect.width,
                             rect.height
                         );
-                        disappearingElements.push(disappearing);
+                        shatteringPieces.push(shattering);
                     }
-                    
-                    elementIndex++;
-                    setTimeout(removeNextElement, 100);
-                }
-            };
-
-            removeNextElement();
+                }, index * 50);
+            });
 
             // Animation loop
             const animationInterval = setInterval(() => {
-                disappearingElements = disappearingElements.filter(el => el.isAlive());
-                disappearingElements.forEach(el => el.update());
+                // Update shattering pieces
+                shatteringPieces = shatteringPieces.filter(piece => piece.isAlive());
+                shatteringPieces.forEach(piece => piece.update());
+                
+                // Update loose debris
+                debrisParticles = debrisParticles.filter(d => d.isAlive());
+                debrisParticles.forEach(d => d.update());
 
-                if (disappearingElements.length === 0) {
+                if (shatteringPieces.length === 0 && debrisParticles.length === 0) {
                     clearInterval(animationInterval);
                     
-                    // Reset after animation completes
+                    // Cleanup
+                    shatteringPieces.forEach(piece => piece.cleanup());
+                    debrisParticles.forEach(d => d.remove());
+                    
+                    // Reset after animation
                     setTimeout(() => {
                         elementIds.forEach(id => {
                             const element = document.getElementById(id);
@@ -315,7 +414,7 @@
                         
                         connectBtn.disabled = false;
                         loginForm.reset();
-                    }, 500);
+                    }, 300);
                 }
             }, 16);
         });
