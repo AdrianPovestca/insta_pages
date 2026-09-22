@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect - Fire Edition</title>
+    <title>Connect - Realistic Fire</title>
     <style>
         * {
             margin: 0;
@@ -21,7 +21,7 @@
             overflow: hidden;
         }
 
-        .canvas-fire {
+        canvas {
             position: fixed;
             top: 0;
             left: 0;
@@ -34,7 +34,6 @@
         .login-wrapper {
             width: 100%;
             max-width: 450px;
-            perspective: 1000px;
             z-index: 10;
             position: relative;
         }
@@ -46,41 +45,10 @@
             border-radius: 20px;
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), 0 0 1px rgba(0, 0, 0, 0.1);
             position: relative;
-            transition: all 0.3s ease;
         }
 
-        .login-container.burning {
-            background: rgba(255, 255, 255, 0.85);
-            box-shadow: 0 0 40px rgba(255, 100, 0, 0.6), 0 25px 50px rgba(0, 0, 0, 0.3);
-        }
-
-        .falling-element {
-            position: absolute;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            opacity: 1;
-            pointer-events: none;
-        }
-
-        .falling-element.text-element {
-            background: transparent;
-            box-shadow: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-        }
-
-        @keyframes smoke {
-            0% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
+        .form-element {
+            margin-bottom: 24px;
         }
 
         .title {
@@ -100,11 +68,6 @@
             margin-bottom: 35px;
             font-weight: 500;
             letter-spacing: 0.3px;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-            position: relative;
         }
 
         .form-group label {
@@ -169,143 +132,115 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
-
-        .success-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s ease;
-        }
-
-        .success-overlay.show {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .success-message {
-            background: white;
-            padding: 50px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
-            transform: scale(0.8);
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .success-overlay.show .success-message {
-            transform: scale(1);
-        }
-
-        .success-message h2 {
-            font-size: 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 12px;
-            font-weight: 700;
-        }
-
-        .success-message p {
-            color: #666;
-            font-size: 15px;
-            font-weight: 500;
-        }
-
-        .checkmark {
-            font-size: 48px;
-            margin-bottom: 16px;
-            display: block;
-            animation: checkAnimation 0.6s ease;
-        }
-
-        @keyframes checkAnimation {
-            0% {
-                transform: scale(0) rotate(-45deg);
-            }
-            100% {
-                transform: scale(1) rotate(0deg);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 35px 25px;
-            }
-
-            .title {
-                font-size: 28px;
-            }
-        }
     </style>
 </head>
 <body>
-    <canvas id="fireCanvas" class="canvas-fire"></canvas>
+    <canvas id="fireCanvas"></canvas>
 
     <div class="login-wrapper">
         <div class="login-container" id="loginContainer">
             <form id="loginForm">
-                <div id="titleContainer">
+                <div class="form-element" id="title">
                     <h1 class="title">Welcome</h1>
                 </div>
 
-                <div id="subtitleContainer">
+                <div class="form-element" id="subtitle">
                     <p class="subtitle">Enter your details to connect</p>
                 </div>
 
-                <div id="emailContainer">
+                <div class="form-element" id="email">
                     <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" placeholder="you@example.com" required>
+                        <label for="emailInput">Email Address</label>
+                        <input type="email" id="emailInput" placeholder="you@example.com" required>
                     </div>
                 </div>
 
-                <div id="passwordContainer">
+                <div class="form-element" id="password">
                     <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" placeholder="Enter your password" required>
+                        <label for="passwordInput">Password</label>
+                        <input type="password" id="passwordInput" placeholder="Enter your password" required>
                     </div>
                 </div>
 
-                <div id="buttonContainer">
+                <div class="form-element" id="button">
                     <button type="submit" class="connect-btn" id="connectBtn">Connect Now</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div class="success-overlay" id="successOverlay">
-        <div class="success-message">
-            <span class="checkmark">✓</span>
-            <h2>Connected!</h2>
-            <p>Rising from the ashes</p>
-        </div>
-    </div>
-
     <script>
-        class Particle {
-            constructor(x, y, vx, vy, scale = 1) {
+        const canvas = document.getElementById('fireCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Particle system for realistic fire
+        class FireParticle {
+            constructor(x, y) {
                 this.x = x;
                 this.y = y;
-                this.vx = vx;
-                this.vy = vy;
-                this.scale = scale;
-                this.rotation = Math.random() * Math.PI * 2;
-                this.rotationSpeed = (Math.random() - 0.5) * 0.3;
-                this.gravity = 0.15;
-                this.friction = 0.98;
+                this.vx = (Math.random() - 0.5) * 6;
+                this.vy = -Math.random() * 8 - 4;
                 this.life = 1;
-                this.decay = Math.random() * 0.01 + 0.008;
-                this.element = null;
+                this.size = Math.random() * 40 + 20;
+                this.hue = Math.random() * 60 + 0;
+                this.friction = 0.98;
+            }
+
+            update() {
+                this.vx *= this.friction;
+                this.vy -= 0.2;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= 0.02;
+            }
+
+            draw() {
+                const colorLife = this.life * 360;
+                let hue = this.hue + (1 - this.life) * 100;
+                let saturation = 100;
+                let lightness = 50 * this.life;
+
+                if (this.life > 0.5) {
+                    lightness = 50 * (1 - (this.life - 0.5) * 2);
+                }
+
+                const alpha = Math.pow(this.life, 2) * 0.8;
+
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+                gradient.addColorStop(0, `hsla(${hue}, ${saturation}%, 70%, ${alpha})`);
+                gradient.addColorStop(0.5, `hsla(${hue + 30}, ${saturation}%, ${lightness}%, ${alpha * 0.7})`);
+                gradient.addColorStop(1, `hsla(${hue + 60}, ${saturation}%, ${lightness}%, 0)`);
+
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Element physics
+        class FallingElement {
+            constructor(element, startX, startY, width, height) {
+                this.element = element;
+                this.x = startX;
+                this.y = startY;
+                this.width = width;
+                this.height = height;
+                this.vx = (Math.random() - 0.5) * 3;
+                this.vy = 0;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.angularVelocity = (Math.random() - 0.5) * 0.3;
+                this.gravity = 0.35;
+                this.friction = 0.98;
+                this.bounceFriction = 0.4;
             }
 
             update() {
@@ -314,216 +249,161 @@
                 this.vy *= this.friction;
                 this.x += this.vx;
                 this.y += this.vy;
-                this.rotation += this.rotationSpeed;
-                this.life -= this.decay;
+                this.rotation += this.angularVelocity;
 
-                if (this.element) {
-                    this.element.style.left = this.x + 'px';
-                    this.element.style.top = this.y + 'px';
-                    this.element.style.opacity = Math.max(0, this.life);
-                    this.element.style.transform = `rotate(${this.rotation}rad) scale(${this.scale * this.life})`;
+                // Floor bounce
+                if (this.y + this.height > window.innerHeight) {
+                    this.y = window.innerHeight - this.height;
+                    this.vy *= -this.bounceFriction;
+                    this.angularVelocity *= 0.8;
+                    if (Math.abs(this.vy) < 1) {
+                        this.vy = 0;
+                    }
                 }
+
+                // Wall bounce
+                if (this.x < 0) {
+                    this.x = 0;
+                    this.vx *= -this.bounceFriction;
+                }
+                if (this.x + this.width > window.innerWidth) {
+                    this.x = window.innerWidth - this.width;
+                    this.vx *= -this.bounceFriction;
+                }
+
+                // Update element position
+                this.element.style.position = 'fixed';
+                this.element.style.left = this.x + 'px';
+                this.element.style.top = this.y + 'px';
+                this.element.style.transform = `rotate(${this.rotation}rad)`;
+                this.element.style.zIndex = '50';
+                this.element.style.pointerEvents = 'none';
             }
 
-            isAlive() {
-                return this.life > 0;
+            isActive() {
+                return this.y < window.innerHeight + 100;
             }
         }
 
-        class FireEffect {
-            constructor(canvas) {
-                this.canvas = canvas;
-                this.ctx = canvas.getContext('2d');
-                this.width = canvas.width;
-                this.height = canvas.height;
-                this.particles = [];
-                this.animationId = null;
-                this.isActive = false;
-            }
+        let fireParticles = [];
+        let fallingElements = [];
+        let fireActive = false;
+        let elementsFalling = false;
 
-            resize() {
-                this.width = this.canvas.width = window.innerWidth;
-                this.height = this.canvas.height = window.innerHeight;
-            }
+        function drawFire() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            createFlames(x, y, intensity = 20) {
-                for (let i = 0; i < intensity; i++) {
-                    const angle = (Math.random() - 0.5) * Math.PI * 0.8;
-                    const speed = Math.random() * 3 + 2;
-                    const vx = Math.cos(angle) * speed;
-                    const vy = -Math.random() * 5 - 3;
-                    
-                    const particle = {
-                        x: x,
-                        y: y,
-                        vx: vx,
-                        vy: vy,
-                        life: 1,
-                        size: Math.random() * 30 + 20,
-                        hue: Math.random() * 30 + 330
-                    };
-                    this.particles.push(particle);
-                }
-            }
+            // Draw fire particles
+            fireParticles = fireParticles.filter(p => p.life > 0);
+            fireParticles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+        }
 
-            update() {
-                this.particles = this.particles.filter(p => {
-                    p.vy += 0.1;
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.life -= 0.015;
-                    p.vx *= 0.99;
-                    return p.life > 0;
-                });
-            }
+        function animate() {
+            drawFire();
 
-            draw() {
-                this.ctx.clearRect(0, 0, this.width, this.height);
-
-                this.particles.forEach(p => {
-                    const hue = p.hue + (1 - p.life) * 60;
-                    const alpha = Math.pow(p.life, 2) * 0.7;
-                    
-                    const gradient = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
-                    gradient.addColorStop(0, `hsla(${hue}, 100%, 60%, ${alpha})`);
-                    gradient.addColorStop(0.5, `hsla(${hue - 20}, 100%, 50%, ${alpha * 0.5})`);
-                    gradient.addColorStop(1, `hsla(${hue - 40}, 100%, 40%, 0)`);
-
-                    this.ctx.fillStyle = gradient;
-                    this.ctx.beginPath();
-                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    this.ctx.fill();
-                });
-            }
-
-            animate() {
-                if (!this.isActive) return;
-                this.update();
-                this.draw();
-                this.animationId = requestAnimationFrame(() => this.animate());
-            }
-
-            start() {
-                this.isActive = true;
-                this.canvas.style.display = 'block';
-                this.animate();
-            }
-
-            stop() {
-                this.isActive = false;
-                this.canvas.style.display = 'none';
-                cancelAnimationFrame(this.animationId);
+            if (fireActive || elementsFalling) {
+                requestAnimationFrame(animate);
             }
         }
 
-        // Setup
-        const canvas = document.getElementById('fireCanvas');
-        const fireEffect = new FireEffect(canvas);
-        fireEffect.resize();
-
-        window.addEventListener('resize', () => fireEffect.resize());
-
-        // Elements to fall
-        const elementsToFall = [
-            { id: 'titleContainer', delay: 0 },
-            { id: 'subtitleContainer', delay: 100 },
-            { id: 'emailContainer', delay: 200 },
-            { id: 'passwordContainer', delay: 300 },
-            { id: 'buttonContainer', delay: 400 }
-        ];
+        function generateFire(x, y) {
+            for (let i = 0; i < 8; i++) {
+                fireParticles.push(new FireParticle(x, y));
+            }
+        }
 
         const loginForm = document.getElementById('loginForm');
         const connectBtn = document.getElementById('connectBtn');
-        const successOverlay = document.getElementById('successOverlay');
         const loginContainer = document.getElementById('loginContainer');
 
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
             connectBtn.disabled = true;
-            loginContainer.classList.add('burning');
-            fireEffect.start();
+            fireActive = true;
+            elementsFalling = true;
+            canvas.style.display = 'block';
 
-            // Generate flames continuously during sequence
-            let flameInterval = setInterval(() => {
-                const containerRect = loginContainer.getBoundingClientRect();
-                const centerX = window.innerWidth / 2;
-                fireEffect.createFlames(centerX, containerRect.top + containerRect.height / 2, 15);
-            }, 50);
+            // Get container center for fire
+            const containerRect = loginContainer.getBoundingClientRect();
+            const fireX = window.innerWidth / 2;
+            const fireY = containerRect.top + containerRect.height / 2;
 
-            // Create falling elements with physics
-            elementsToFall.forEach(({ id, delay }) => {
-                setTimeout(() => {
-                    const element = document.getElementById(id);
+            // Generate continuous fire
+            const fireInterval = setInterval(() => {
+                if (fireActive) {
+                    generateFire(fireX, fireY);
+                } else {
+                    clearInterval(fireInterval);
+                }
+            }, 40);
+
+            // Elements to make fall
+            const elementIds = ['title', 'subtitle', 'email', 'password', 'button'];
+            let currentElementIndex = 0;
+
+            const dropNextElement = () => {
+                if (currentElementIndex < elementIds.length && fireActive) {
+                    const elementId = elementIds[currentElementIndex];
+                    const element = document.getElementById(elementId);
                     if (element) {
-                        element.style.position = 'absolute';
-                        element.style.pointerEvents = 'none';
-                        
-                        // Get position relative to viewport
                         const rect = element.getBoundingClientRect();
-                        const startX = rect.left;
-                        const startY = rect.top;
-                        
-                        // Create physics object
-                        const physics = {
-                            x: startX,
-                            y: startY,
-                            vx: (Math.random() - 0.5) * 4,
-                            vy: 0,
-                            gravity: 0.25,
-                            friction: 0.99,
-                            rotation: 0,
-                            rotationSpeed: (Math.random() - 0.5) * 0.15
-                        };
-
-                        let animationId = requestAnimationFrame(function fallAnim() {
-                            physics.vy += physics.gravity;
-                            physics.vx *= physics.friction;
-                            physics.vy *= physics.friction;
-                            physics.x += physics.vx;
-                            physics.y += physics.vy;
-                            physics.rotation += physics.rotationSpeed;
-
-                            element.style.left = physics.x + 'px';
-                            element.style.top = physics.y + 'px';
-                            element.style.transform = `rotate(${physics.rotation}rad)`;
-                            element.style.opacity = Math.max(0, 1 - (physics.y - startY) / 800);
-
-                            if (physics.y < window.innerHeight + 200) {
-                                animationId = requestAnimationFrame(fallAnim);
-                            } else {
-                                element.style.display = 'none';
-                            }
-                        });
+                        const fallingElement = new FallingElement(
+                            element,
+                            rect.left,
+                            rect.top,
+                            rect.width,
+                            rect.height
+                        );
+                        fallingElements.push(fallingElement);
                     }
-                }, delay);
-            });
+                    currentElementIndex++;
+                    setTimeout(dropNextElement, 150);
+                }
+            };
 
-            // Stop fire and show success
-            setTimeout(() => {
-                clearInterval(flameInterval);
-                fireEffect.stop();
-                loginContainer.classList.remove('burning');
-                successOverlay.classList.add('show');
-            }, 2000);
+            // Start dropping elements after delay
+            setTimeout(dropNextElement, 200);
 
-            // Reset
+            // Fire duration
             setTimeout(() => {
-                successOverlay.classList.remove('show');
-                elementsToFall.forEach(({ id }) => {
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.style.position = 'relative';
-                        element.style.left = '0';
-                        element.style.top = '0';
-                        element.style.transform = 'none';
-                        element.style.opacity = '1';
-                        element.style.display = 'block';
-                    }
-                });
-                connectBtn.disabled = false;
-                loginForm.reset();
-            }, 3500);
+                fireActive = false;
+                setTimeout(() => {
+                    canvas.style.display = 'none';
+                    elementsFalling = false;
+                    connectBtn.disabled = false;
+
+                    // Reset
+                    elementIds.forEach(id => {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.style.position = 'relative';
+                            element.style.left = '0';
+                            element.style.top = '0';
+                            element.style.transform = 'none';
+                            element.style.zIndex = 'auto';
+                        }
+                    });
+
+                    fallingElements = [];
+                    loginForm.reset();
+                }, 3000);
+            }, 2500);
+
+            // Physics update loop
+            const physicsInterval = setInterval(() => {
+                fallingElements = fallingElements.filter(el => el.isActive());
+                fallingElements.forEach(el => el.update());
+
+                if (!elementsFalling && fallingElements.length === 0) {
+                    clearInterval(physicsInterval);
+                }
+            }, 16);
+
+            animate();
         });
     </script>
 </body>
