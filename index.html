@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect - Chaos Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            overflow: hidden;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .login-container h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+
+        .login-container p {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .connect-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .connect-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Floating buttons container */
+        .floating-buttons {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .floating-btn {
+            position: absolute;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: none;
+        }
+
+        .btn-style-1 {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-style-2 {
+            background: #764ba2;
+            color: white;
+        }
+
+        .btn-style-3 {
+            background: #f093fb;
+            color: white;
+        }
+
+        .btn-style-4 {
+            background: #4facfe;
+            color: white;
+        }
+
+        .btn-style-5 {
+            background: #fa709a;
+            color: white;
+        }
+
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        .success-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            z-index: 100;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .success-message.show {
+            opacity: 1;
+        }
+
+        .success-message h2 {
+            font-size: 24px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .success-message p {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-buttons" id="floatingButtonsContainer"></div>
+
+    <div class="login-container">
+        <h1>Welcome</h1>
+        <p>Enter your details to connect</p>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="your@email.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            
+            <button type="submit" class="connect-btn">Connect</button>
+        </form>
+    </div>
+
+    <div class="success-message" id="successMessage">
+        <h2>Connected!</h2>
+        <p>Welcome aboard 🚀</p>
+    </div>
+
+    <script>
+        class FloatingButton {
+            constructor(text, x, y, styleClass) {
+                this.text = text;
+                this.x = x;
+                this.y = y;
+                this.styleClass = styleClass;
+                this.vx = (Math.random() - 0.5) * 8;
+                this.vy = (Math.random() - 0.5) * 8 - 5;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = (Math.random() - 0.5) * 15;
+                this.gravity = 0.3;
+                this.element = null;
+            }
+
+            create() {
+                this.element = document.createElement('button');
+                this.element.className = `floating-btn ${this.styleClass}`;
+                this.element.textContent = this.text;
+                this.element.style.left = this.x + 'px';
+                this.element.style.top = this.y + 'px';
+                document.getElementById('floatingButtonsContainer').appendChild(this.element);
+            }
+
+            update() {
+                this.vy += this.gravity;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.rotation += this.rotationSpeed;
+
+                // Bounce off walls
+                if (this.x < 0 || this.x > window.innerWidth - 100) {
+                    this.vx *= -0.8;
+                    this.x = Math.max(0, Math.min(window.innerWidth - 100, this.x));
+                }
+
+                // Floor collision
+                if (this.y > window.innerHeight - 50) {
+                    this.vy *= -0.6;
+                    this.y = window.innerHeight - 50;
+                    this.vx *= 0.95;
+                }
+
+                // Update element
+                if (this.element) {
+                    this.element.style.left = this.x + 'px';
+                    this.element.style.top = this.y + 'px';
+                    this.element.style.transform = `rotate(${this.rotation}deg)`;
+                }
+            }
+
+            isOffScreen() {
+                return this.y > window.innerHeight + 100;
+            }
+        }
+
+        const buttonTexts = [
+            'Connect', 'Login', 'Submit', 'Enter', 'Go', 'Send', 'Start', 
+            'Click Me', 'Press', 'Execute', 'Run', 'Launch', 'Activate'
+        ];
+        const styleClasses = ['btn-style-1', 'btn-style-2', 'btn-style-3', 'btn-style-4', 'btn-style-5'];
+        let floatingButtons = [];
+        let animationId = null;
+
+        function createFloatingButtons() {
+            const container = document.getElementById('floatingButtonsContainer');
+            container.innerHTML = '';
+            floatingButtons = [];
+
+            for (let i = 0; i < 15; i++) {
+                const randomText = buttonTexts[Math.floor(Math.random() * buttonTexts.length)];
+                const randomStyle = styleClasses[Math.floor(Math.random() * styleClasses.length)];
+                const button = new FloatingButton(
+                    randomText,
+                    Math.random() * (window.innerWidth - 100),
+                    Math.random() * (window.innerHeight * 0.3),
+                    randomStyle
+                );
+                button.create();
+                floatingButtons.push(button);
+            }
+
+            startAnimation();
+        }
+
+        function startAnimation() {
+            function animate() {
+                floatingButtons = floatingButtons.filter(btn => !btn.isOffScreen());
+                floatingButtons.forEach(btn => btn.update());
+
+                if (floatingButtons.length > 0) {
+                    animationId = requestAnimationFrame(animate);
+                } else {
+                    cancelAnimationFrame(animationId);
+                    // Show success message
+                    setTimeout(() => {
+                        document.getElementById('successMessage').classList.add('show');
+                    }, 500);
+                }
+            }
+
+            animate();
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            createFloatingButtons();
+            
+            // Reset form for demo
+            setTimeout(() => {
+                this.reset();
+                document.getElementById('successMessage').classList.remove('show');
+            }, 3000);
+        });
+
+        // Add some buttons on load for demo
+        window.addEventListener('load', function() {
+            // Optional: add a few demo buttons on load
+        });
+    </script>
+</body>
+</html>
