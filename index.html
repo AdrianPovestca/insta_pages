@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect - Premium Edition</title>
+    <title>Connect - Fire Edition</title>
     <style>
         * {
             margin: 0;
@@ -21,10 +21,22 @@
             overflow: hidden;
         }
 
+        .canvas-fire {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            display: none;
+        }
+
         .login-wrapper {
             width: 100%;
             max-width: 450px;
             perspective: 1000px;
+            z-index: 10;
+            position: relative;
         }
 
         .login-container {
@@ -34,26 +46,40 @@
             border-radius: 20px;
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), 0 0 1px rgba(0, 0, 0, 0.1);
             position: relative;
-        }
-
-        .form-element {
-            opacity: 1;
-            transform: translateY(0) rotateX(0deg);
             transition: all 0.3s ease;
         }
 
-        .form-element.falling {
-            animation: elementFall 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        .login-container.burning {
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 0 40px rgba(255, 100, 0, 0.6), 0 25px 50px rgba(0, 0, 0, 0.3);
         }
 
-        @keyframes elementFall {
+        .falling-element {
+            position: absolute;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            opacity: 1;
+            pointer-events: none;
+        }
+
+        .falling-element.text-element {
+            background: transparent;
+            box-shadow: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        @keyframes smoke {
             0% {
                 opacity: 1;
-                transform: translateY(0) rotateX(0deg) scale(1);
+                transform: translateY(0);
             }
             100% {
                 opacity: 0;
-                transform: translateY(600px) rotateX(25deg) scale(0.8);
+                transform: translateY(-20px);
             }
         }
 
@@ -144,18 +170,17 @@
             cursor: not-allowed;
         }
 
-        /* Success state */
         .success-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 100;
+            z-index: 200;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.5s ease;
@@ -171,7 +196,7 @@
             padding: 50px;
             border-radius: 20px;
             text-align: center;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
             transform: scale(0.8);
             transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -212,34 +237,6 @@
             }
         }
 
-        /* Stagger delays */
-        .form-element:nth-child(1) { --stagger-delay: 0s; }
-        .form-element:nth-child(2) { --stagger-delay: 0.1s; }
-        .form-element:nth-child(3) { --stagger-delay: 0.2s; }
-        .form-element:nth-child(4) { --stagger-delay: 0.3s; }
-
-        .form-element.falling {
-            animation-delay: var(--stagger-delay);
-        }
-
-        /* Glassmorphism shine effect on hover */
-        .login-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            border-radius: 20px;
-            transition: left 0.5s ease;
-            pointer-events: none;
-        }
-
-        .login-container:hover::before {
-            left: 100%;
-        }
-
         @media (max-width: 480px) {
             .login-container {
                 padding: 35px 25px;
@@ -248,41 +245,38 @@
             .title {
                 font-size: 28px;
             }
-
-            .connect-btn {
-                font-size: 14px;
-                padding: 12px;
-            }
         }
     </style>
 </head>
 <body>
+    <canvas id="fireCanvas" class="canvas-fire"></canvas>
+
     <div class="login-wrapper">
-        <div class="login-container">
+        <div class="login-container" id="loginContainer">
             <form id="loginForm">
-                <div class="form-element">
+                <div id="titleContainer">
                     <h1 class="title">Welcome</h1>
                 </div>
 
-                <div class="form-element">
+                <div id="subtitleContainer">
                     <p class="subtitle">Enter your details to connect</p>
                 </div>
 
-                <div class="form-element">
+                <div id="emailContainer">
                     <div class="form-group">
                         <label for="email">Email Address</label>
                         <input type="email" id="email" placeholder="you@example.com" required>
                     </div>
                 </div>
 
-                <div class="form-element">
+                <div id="passwordContainer">
                     <div class="form-group">
                         <label for="password">Password</label>
                         <input type="password" id="password" placeholder="Enter your password" required>
                     </div>
                 </div>
 
-                <div class="form-element">
+                <div id="buttonContainer">
                     <button type="submit" class="connect-btn" id="connectBtn">Connect Now</button>
                 </div>
             </form>
@@ -293,41 +287,243 @@
         <div class="success-message">
             <span class="checkmark">✓</span>
             <h2>Connected!</h2>
-            <p>You're all set to explore</p>
+            <p>Rising from the ashes</p>
         </div>
     </div>
 
     <script>
+        class Particle {
+            constructor(x, y, vx, vy, scale = 1) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.scale = scale;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.3;
+                this.gravity = 0.15;
+                this.friction = 0.98;
+                this.life = 1;
+                this.decay = Math.random() * 0.01 + 0.008;
+                this.element = null;
+            }
+
+            update() {
+                this.vy += this.gravity;
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.rotation += this.rotationSpeed;
+                this.life -= this.decay;
+
+                if (this.element) {
+                    this.element.style.left = this.x + 'px';
+                    this.element.style.top = this.y + 'px';
+                    this.element.style.opacity = Math.max(0, this.life);
+                    this.element.style.transform = `rotate(${this.rotation}rad) scale(${this.scale * this.life})`;
+                }
+            }
+
+            isAlive() {
+                return this.life > 0;
+            }
+        }
+
+        class FireEffect {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.width = canvas.width;
+                this.height = canvas.height;
+                this.particles = [];
+                this.animationId = null;
+                this.isActive = false;
+            }
+
+            resize() {
+                this.width = this.canvas.width = window.innerWidth;
+                this.height = this.canvas.height = window.innerHeight;
+            }
+
+            createFlames(x, y, intensity = 20) {
+                for (let i = 0; i < intensity; i++) {
+                    const angle = (Math.random() - 0.5) * Math.PI * 0.8;
+                    const speed = Math.random() * 3 + 2;
+                    const vx = Math.cos(angle) * speed;
+                    const vy = -Math.random() * 5 - 3;
+                    
+                    const particle = {
+                        x: x,
+                        y: y,
+                        vx: vx,
+                        vy: vy,
+                        life: 1,
+                        size: Math.random() * 30 + 20,
+                        hue: Math.random() * 30 + 330
+                    };
+                    this.particles.push(particle);
+                }
+            }
+
+            update() {
+                this.particles = this.particles.filter(p => {
+                    p.vy += 0.1;
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life -= 0.015;
+                    p.vx *= 0.99;
+                    return p.life > 0;
+                });
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+
+                this.particles.forEach(p => {
+                    const hue = p.hue + (1 - p.life) * 60;
+                    const alpha = Math.pow(p.life, 2) * 0.7;
+                    
+                    const gradient = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+                    gradient.addColorStop(0, `hsla(${hue}, 100%, 60%, ${alpha})`);
+                    gradient.addColorStop(0.5, `hsla(${hue - 20}, 100%, 50%, ${alpha * 0.5})`);
+                    gradient.addColorStop(1, `hsla(${hue - 40}, 100%, 40%, 0)`);
+
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+            }
+
+            animate() {
+                if (!this.isActive) return;
+                this.update();
+                this.draw();
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+
+            start() {
+                this.isActive = true;
+                this.canvas.style.display = 'block';
+                this.animate();
+            }
+
+            stop() {
+                this.isActive = false;
+                this.canvas.style.display = 'none';
+                cancelAnimationFrame(this.animationId);
+            }
+        }
+
+        // Setup
+        const canvas = document.getElementById('fireCanvas');
+        const fireEffect = new FireEffect(canvas);
+        fireEffect.resize();
+
+        window.addEventListener('resize', () => fireEffect.resize());
+
+        // Elements to fall
+        const elementsToFall = [
+            { id: 'titleContainer', delay: 0 },
+            { id: 'subtitleContainer', delay: 100 },
+            { id: 'emailContainer', delay: 200 },
+            { id: 'passwordContainer', delay: 300 },
+            { id: 'buttonContainer', delay: 400 }
+        ];
+
         const loginForm = document.getElementById('loginForm');
         const connectBtn = document.getElementById('connectBtn');
         const successOverlay = document.getElementById('successOverlay');
-        const formElements = document.querySelectorAll('.form-element');
+        const loginContainer = document.getElementById('loginContainer');
 
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // Disable button
             connectBtn.disabled = true;
+            loginContainer.classList.add('burning');
+            fireEffect.start();
 
-            // Add falling animation to all elements
-            formElements.forEach(element => {
-                element.classList.add('falling');
+            // Generate flames continuously during sequence
+            let flameInterval = setInterval(() => {
+                const containerRect = loginContainer.getBoundingClientRect();
+                const centerX = window.innerWidth / 2;
+                fireEffect.createFlames(centerX, containerRect.top + containerRect.height / 2, 15);
+            }, 50);
+
+            // Create falling elements with physics
+            elementsToFall.forEach(({ id, delay }) => {
+                setTimeout(() => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.style.position = 'absolute';
+                        element.style.pointerEvents = 'none';
+                        
+                        // Get position relative to viewport
+                        const rect = element.getBoundingClientRect();
+                        const startX = rect.left;
+                        const startY = rect.top;
+                        
+                        // Create physics object
+                        const physics = {
+                            x: startX,
+                            y: startY,
+                            vx: (Math.random() - 0.5) * 4,
+                            vy: 0,
+                            gravity: 0.25,
+                            friction: 0.99,
+                            rotation: 0,
+                            rotationSpeed: (Math.random() - 0.5) * 0.15
+                        };
+
+                        let animationId = requestAnimationFrame(function fallAnim() {
+                            physics.vy += physics.gravity;
+                            physics.vx *= physics.friction;
+                            physics.vy *= physics.friction;
+                            physics.x += physics.vx;
+                            physics.y += physics.vy;
+                            physics.rotation += physics.rotationSpeed;
+
+                            element.style.left = physics.x + 'px';
+                            element.style.top = physics.y + 'px';
+                            element.style.transform = `rotate(${physics.rotation}rad)`;
+                            element.style.opacity = Math.max(0, 1 - (physics.y - startY) / 800);
+
+                            if (physics.y < window.innerHeight + 200) {
+                                animationId = requestAnimationFrame(fallAnim);
+                            } else {
+                                element.style.display = 'none';
+                            }
+                        });
+                    }
+                }, delay);
             });
 
-            // Show success message after animation completes
+            // Stop fire and show success
             setTimeout(() => {
+                clearInterval(flameInterval);
+                fireEffect.stop();
+                loginContainer.classList.remove('burning');
                 successOverlay.classList.add('show');
-            }, 600);
+            }, 2000);
 
-            // Reset form for demo (optional)
+            // Reset
             setTimeout(() => {
                 successOverlay.classList.remove('show');
-                formElements.forEach(element => {
-                    element.classList.remove('falling');
+                elementsToFall.forEach(({ id }) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.style.position = 'relative';
+                        element.style.left = '0';
+                        element.style.top = '0';
+                        element.style.transform = 'none';
+                        element.style.opacity = '1';
+                        element.style.display = 'block';
+                    }
                 });
                 connectBtn.disabled = false;
                 loginForm.reset();
-            }, 3000);
+            }, 3500);
         });
     </script>
 </body>
