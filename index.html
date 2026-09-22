@@ -179,18 +179,20 @@
     </div>
 
     <script>
-        // Debris particle system
+        // Debris particle system - heavier smoke effect
         class DebrisParticle {
             constructor(x, y) {
                 this.x = x;
                 this.y = y;
-                this.vx = (Math.random() - 0.5) * 12;
-                this.vy = (Math.random() - 0.5) * 12 - 2;
+                this.vx = (Math.random() - 0.5) * 8;
+                this.vy = (Math.random() - 0.5) * 8 - 1;
                 this.life = 1;
-                this.size = Math.random() * 8 + 2;
-                this.opacity = Math.random() * 0.8 + 0.2;
-                this.decay = Math.random() * 0.03 + 0.02;
-                this.gravity = 0.2;
+                // Bigger particles for heavier smoke effect
+                this.size = Math.random() * 20 + 8;
+                this.opacity = Math.random() * 0.6 + 0.3;
+                // Much slower decay - particles last 4+ seconds
+                this.decay = Math.random() * 0.008 + 0.004;
+                this.gravity = 0.08;
                 this.element = null;
             }
 
@@ -199,16 +201,18 @@
                 this.element.className = 'debris-particle';
                 this.element.style.width = this.size + 'px';
                 this.element.style.height = this.size + 'px';
-                this.element.style.background = `rgba(200, 200, 200, ${this.opacity})`;
+                // Smoke-like gray color, more transparent
+                this.element.style.background = `rgba(180, 180, 180, ${this.opacity * 0.7})`;
                 this.element.style.borderRadius = '50%';
-                this.element.style.boxShadow = `0 0 ${this.size}px rgba(150, 150, 150, 0.6)`;
+                this.element.style.boxShadow = `0 0 ${this.size * 1.5}px rgba(120, 120, 120, 0.4)`;
+                this.element.style.filter = 'blur(2px)';
                 document.body.appendChild(this.element);
             }
 
             update() {
                 this.vy += this.gravity;
-                this.vx *= 0.98;
-                this.vy *= 0.98;
+                this.vx *= 0.99;
+                this.vy *= 0.99;
                 this.x += this.vx;
                 this.y += this.vy;
                 this.life -= this.decay;
@@ -216,7 +220,7 @@
                 if (this.element) {
                     this.element.style.left = this.x + 'px';
                     this.element.style.top = this.y + 'px';
-                    this.element.style.opacity = Math.max(0, this.life * this.opacity);
+                    this.element.style.opacity = Math.max(0, this.life * this.opacity * 0.7);
                 }
             }
 
@@ -258,7 +262,8 @@
                 this.gravity = 0.2;
                 this.friction = 0.96;
                 this.life = 1;
-                this.decay = 0.012;
+                // Much slower decay - elements stay longer before disappearing
+                this.decay = 0.005;
                 this.debrisParticles = [];
             }
 
@@ -345,8 +350,8 @@
             const centerX = containerRect.left + containerRect.width / 2;
             const centerY = containerRect.top + containerRect.height / 2;
 
-            // Create debris burst at center
-            for (let i = 0; i < 30; i++) {
+            // Create debris burst at center - more debris for heavier effect
+            for (let i = 0; i < 50; i++) {
                 const debris = new DebrisParticle(centerX, centerY);
                 debris.create();
                 debrisParticles.push(debris);
@@ -361,8 +366,8 @@
                     if (element) {
                         const rect = element.getBoundingClientRect();
                         
-                        // Create more debris at element position
-                        for (let i = 0; i < 8; i++) {
+                        // Create more debris at element position - increased from 8 to 15
+                        for (let i = 0; i < 15; i++) {
                             const debris = new DebrisParticle(rect.left + rect.width / 2, rect.top + rect.height / 2);
                             debris.create();
                             debrisParticles.push(debris);
@@ -397,7 +402,7 @@
                     shatteringPieces.forEach(piece => piece.cleanup());
                     debrisParticles.forEach(d => d.remove());
                     
-                    // Reset after animation
+                    // Reset after 4 seconds total
                     setTimeout(() => {
                         elementIds.forEach(id => {
                             const element = document.getElementById(id);
@@ -414,7 +419,7 @@
                         
                         connectBtn.disabled = false;
                         loginForm.reset();
-                    }, 300);
+                    }, 4000);
                 }
             }, 16);
         });
